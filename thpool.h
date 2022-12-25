@@ -275,7 +275,7 @@ static void  bsem_wait(struct bsem *bsem_p);
 
 /* ========================== ERROR PRINTER ============================ */
 
-void printError(const char *functionName, const char *fileName, int lineNumber)
+void print_error(const char *functionName, const char *fileName, int lineNumber)
 {
     printf("********************************************************************************\nThere was a runtime error:\n{\n");
     if(functionName != NULL)
@@ -305,7 +305,7 @@ struct thpool_* thpool_init(int num_threads){
 	thpool_p = (struct thpool_*)malloc(sizeof(struct thpool_));
 	if (thpool_p == NULL){
 		// Could not allocate memory for thread pool
-        printError("thpool_init", __FILE__, __LINE__);
+        print_error("thpool_init", __FILE__, __LINE__);
 		return NULL;
 	}
 	thpool_p->num_threads_alive   = 0;
@@ -313,7 +313,7 @@ struct thpool_* thpool_init(int num_threads){
 
 	/* Initialise the job queue */
 	if (jobqueue_init(&thpool_p->jobqueue) == -1){
-		printError("thpool_init", __FILE__, __LINE__);
+		print_error("thpool_init", __FILE__, __LINE__);
 		free(thpool_p);
 		return NULL;
 	}
@@ -321,7 +321,7 @@ struct thpool_* thpool_init(int num_threads){
 	/* Make threads in pool */
 	thpool_p->threads = (struct thread**)malloc(num_threads * sizeof(struct thread *));
 	if (thpool_p->threads == NULL){
-		printError("thpool_init", __FILE__, __LINE__);
+		print_error("thpool_init", __FILE__, __LINE__);
 		jobqueue_destroy(&thpool_p->jobqueue);
 		free(thpool_p);
 		return NULL;
@@ -352,7 +352,7 @@ int thpool_add_work(thpool_* thpool_p, void (*function_p)(void*), void* arg_p){
 
 	newjob=(struct job*)malloc(sizeof(struct job));
 	if (newjob==NULL){
-        printError("thpool_add_work", __FILE__, __LINE__); // Could not allocate memory for new job
+        print_error("thpool_add_work", __FILE__, __LINE__); // Could not allocate memory for new job
 		return -1;
 	}
 
@@ -457,7 +457,7 @@ static int thread_init (thpool_* thpool_p, struct thread** thread_p, int id){
 
 	*thread_p = (struct thread*)malloc(sizeof(struct thread));
 	if (*thread_p == NULL){
-        printError("thread_init", __FILE__, __LINE__); // Could not allocate memory for thread
+        print_error("thread_init", __FILE__, __LINE__); // Could not allocate memory for thread
 		return -1;
 	}
 
@@ -512,7 +512,7 @@ static void* thread_do(struct thread* thread_p){
 	act.sa_flags = 0;
 	act.sa_handler = thread_hold;
 	if (sigaction(SIGUSR1, &act, NULL) == -1) {
-        printError("thread_do", __FILE__, __LINE__); // cannot handle SIGUSR1
+        print_error("thread_do", __FILE__, __LINE__); // cannot handle SIGUSR1
 	}
 
 	/* Mark thread as alive (initialized) */
@@ -677,7 +677,7 @@ static void jobqueue_destroy(jobqueue* jobqueue_p){
 /* Init semaphore to 1 or 0 */
 static void bsem_init(bsem *bsem_p, int value) {
 	if (value < 0 || value > 1) {
-        printError("bsem_init", __FILE__, __LINE__); // Binary semaphore can take only values 1 or 0
+        print_error("bsem_init", __FILE__, __LINE__); // Binary semaphore can take only values 1 or 0
 		exit(1);
 	}
 	pthread_mutex_init(&(bsem_p->mutex), NULL);
